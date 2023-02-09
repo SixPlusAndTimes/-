@@ -32,8 +32,8 @@ class Shared_Ptr{
         T* resource_;
     public:
         // 构造函数
-        Shared_Ptr():count_(new Counter(0)),resource_(nullptr) { }
-        Shared_Ptr(T* raw_ptr):count_(new Counter(1)),resource_(raw_ptr) { }
+        explicit Shared_Ptr():count_(new Counter(0)),resource_(nullptr) { }
+        explicit Shared_Ptr(T* raw_ptr):count_(new Counter(1)),resource_(raw_ptr) { }
         // 析构函数
         ~Shared_Ptr() {
             // printf("deconstructor\n");
