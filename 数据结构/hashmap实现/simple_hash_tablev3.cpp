@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <iostream>
 #include <iostream>
 #include <functional>
@@ -17,7 +18,7 @@ public:
     hashtable_node() {}
 };
 // hash表底层vector的size的个数应该为素数
-static const std::vector<int> bucketNumCandidate{3, 5, 7, 11, 13,17,19,23,29,31};
+static const std::vector<int> bucketNumCandidate{3, 5, 7, 13, 23,43,83,163};
 
 template<typename KeyType, typename ValueType, typename HashFunc = std::hash<KeyType>>
 class simple_hash_table { 
@@ -28,8 +29,7 @@ public:
     }
     ValueType& operator[](const KeyType& key) { // 注意这里const key， 返回ValueType的引用
         
-        // 添加新的
-        need_rehash(total_elenum + 1); // 看看要不要rehash
+
         int  bucket_index = haser(key) % buckets.size();
         node* chain_head = buckets[bucket_index];
         // 原hash表中存在这个key：value对
@@ -38,6 +38,10 @@ public:
                 return cur->value.second;
             }
         }
+        // 需要添加新的
+        need_rehash(total_elenum + 1); // 首先看看要不要rehash
+        bucket_index = haser(key) % buckets.size(); // 重新计算索引值
+        chain_head = buckets[bucket_index]; 
 
         node* new_hash_node = new node();
         new_hash_node->value = std::pair<KeyType, ValueType>{key, ValueType{}};
@@ -45,7 +49,6 @@ public:
         buckets[bucket_index] = new_hash_node;
         ++total_elenum;
         
-       
         return new_hash_node->value.second;
     }
     int getNextBucketNum() {
@@ -53,43 +56,6 @@ public:
             return bucket_num_ptr;
         }
         else return ++bucket_num_ptr;
-    }
-    void need_rehash(int hint_num) {
-       
-        int old_n = buckets.size();
-        if (hint_num > old_n) {
-            printf("\n");
-            int next_num = bucketNumCandidate[getNextBucketNum()];
-            // if (next_num == buckets.size()) return; // 已达到最大的哈希表vector长度
-            // rehash 
-            std::cout << "before rehash\n";
-            printTable();
-            printf("next_num = %d\n",next_num);
-            std::vector<node*> tmp(next_num);
-            for(int i = 0; i < old_n; i++) {
-                node* first = buckets[i];
-                while (first) {
-                    int new_buck_num = haser(first->value.first) % next_num; // 新的桶号
-                    // 注意： 除了要将原桶的元素rehash至新桶内，
-                    // node* next_first = first->next;
-
-                    // node* next_node = tmp[new_buck_num];
-                    // tmp[new_buck_num] = first;
-                    // first->next = next_node;
-
-                    // first = next_first;
-
-                    buckets[i] = first->next;
-                    first->next = tmp[new_buck_num];
-                    tmp[new_buck_num] = first;
-                    first = buckets[i];
-                }
-            }
-            printf("rehash complete\n");
-            buckets = std::move(tmp);
-
-            printTable();
-        }
     }
 
     node* find(const KeyType& key) {
@@ -124,7 +90,42 @@ public:
             printf("\n");
         }
     }
+private:
+ void need_rehash(int hint_num) {
+        int old_n = buckets.size();
+        if (hint_num > old_n) {
+            
+            int next_num = bucketNumCandidate[getNextBucketNum()];
+            if (next_num == buckets.size()) return; // 已达到最大的哈希表vector长度
+            /* rehash 开始之前 */ 
+            std::cout << "before rehash\n";
+            printTable();
+            printf("next_bucket_size = %d\n",next_num);
+            std::vector<node*> tmp(next_num);
+            for(int i = 0; i < old_n; i++) {
+                node* first = buckets[i];
+                while (first) {
+                    int new_buck_num = haser(first->value.first) % next_num; // 新的桶号
+                    node* next_first = first->next;
+                    node* next_node = tmp[new_buck_num];
 
+                    tmp[new_buck_num] = first;
+                    first->next = next_node;
+                    first = next_first;
+
+                    /* SGI源码是下面这样写的，更精炼 */
+                    // buckets[i] = first->next;
+                    // first->next = tmp[new_buck_num];
+                    // tmp[new_buck_num] = first;
+                    // first = buckets[i];
+                }
+            }
+            buckets = std::move(tmp); // SGI源码是用swap完成的，不知道有什么区别
+            printf("rehash complete\n");
+            printTable();
+            printf("\n");
+        }
+    }
 private:
     int bucket_num_ptr;
     int total_elenum;
@@ -135,13 +136,13 @@ private:
 int main() {
     simple_hash_table<int, std::string> ht;
     // ht[1] = 2;
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 200; i++) {
         ht[i] = std::to_string(i);
     }
 
     printf("final hashtable:\n");
     ht.printTable();
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 200; i++) {
         if (std::to_string(i) != ht[i]) {
             printf("ht[%d] = %s, not true\n", i, ht[i].c_str());
         }
