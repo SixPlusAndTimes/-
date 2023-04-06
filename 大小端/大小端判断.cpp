@@ -8,5 +8,6 @@ int main() {
     }else {
         cout <<  "大端\n";
     }
+    cout << to_string(aptr[0]) << to_string(aptr[1]) << endl;
     return 0;
 }

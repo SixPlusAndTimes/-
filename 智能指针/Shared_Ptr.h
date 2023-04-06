@@ -30,13 +30,8 @@ class Shared_Ptr{
     private:
         Counter* count_;
         T* resource_;
-    public:
-        // 构造函数
-        explicit Shared_Ptr():count_(new Counter(0)),resource_(nullptr) { }
-        explicit Shared_Ptr(T* raw_ptr):count_(new Counter(1)),resource_(raw_ptr) { }
-        // 析构函数
-        ~Shared_Ptr() {
-            // printf("deconstructor\n");
+
+        void release() {
             if (count_) { // 注意这里应该判断count_是否为nullptr，可能已经被移走了
                 count_->ref_count_--;
                 if (count_->ref_count_== 0) {
@@ -46,7 +41,16 @@ class Shared_Ptr{
                     delete count_;
                 }
             }
+        }
+    public:
+        // 构造函数
+        explicit Shared_Ptr():count_(new Counter(0)),resource_(nullptr) { }
+        explicit Shared_Ptr(T* raw_ptr):count_(new Counter(1)),resource_(raw_ptr) { }
+        // 析构函数
 
+        ~Shared_Ptr() {
+
+            release();
         }
         // 复制构造函数
         Shared_Ptr(const Shared_Ptr& other) {
@@ -57,8 +61,9 @@ class Shared_Ptr{
         // 赋值构造函数
         Shared_Ptr& operator=(const Shared_Ptr& other) {
             if (&other != this) {
-                delete resource_;
-                delete count_;
+                // delete resource_; // 这里有问题，能直接delete吗？
+                // delete count_;
+                release();
 
                 resource_ = other.resource_;
                 count_ = other.count_;
@@ -78,11 +83,11 @@ class Shared_Ptr{
         Shared_Ptr& operator=(Shared_Ptr&& other) {
             // 注意将被移动对象的资源置空
             if (this  != &other) {
-                delete resource_;
+                release(); // 释放资源
+                
                 resource_ = other.resource_;
                 other.resource_ = nullptr;
 
-                delete count_;
                 count_ = other.count_;
                 other.count_ = nullptr;
             }
