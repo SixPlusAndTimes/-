@@ -1,4 +1,5 @@
 #include <atomic>
+#include <cstddef>
 #include <iostream>
 #include <ostream>
 
@@ -32,12 +33,10 @@ class Shared_Ptr{
         T* resource_;
 
         void release() {
-            if (count_) { // 注意这里应该判断count_是否为nullptr，可能已经被移走了
-                count_->ref_count_--;
-                if (count_->ref_count_== 0) {
-                    if (resource_) { // resource_也是同样的道理
-                        delete resource_;
-                    }
+            if (count_ && resource_) { // 注意这里应该判断count_是否为nullptr，可能已经被移走了
+                // count_->ref_count_--;
+                if (--count_->ref_count_== 0) {
+                    delete resource_;
                     delete count_;
                 }
             }
@@ -46,6 +45,11 @@ class Shared_Ptr{
         // 构造函数
         explicit Shared_Ptr():count_(new Counter(0)),resource_(nullptr) { }
         explicit Shared_Ptr(T* raw_ptr):count_(new Counter(1)),resource_(raw_ptr) { }
+        Shared_Ptr(std::nullptr_t nPtr) {
+            release();
+            resource_ = nPtr;
+            count_ = nPtr;
+        }
         // 析构函数
 
         ~Shared_Ptr() {
