@@ -1,5 +1,18 @@
 #include "Shared_Ptr.h"
 #include <memory>
+// 测试用的类
+class Node {
+public:
+    int val_;
+    Node* next_;
+    Node(int val, Node* next) : val_(val), next_(next){}
+    Node& operator=(const Node& other){
+        val_ = other.val_;
+        next_ = other.next_;
+        return *this;
+    }
+};
+
 Shared_Ptr<Node> getSharedPtr() {
     return Shared_Ptr<Node>(new Node(1,nullptr));
 }

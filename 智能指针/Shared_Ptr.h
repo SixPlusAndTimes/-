@@ -3,18 +3,6 @@
 #include <iostream>
 #include <ostream>
 
-// 测试用的类
-class Node {
-public:
-    int val_;
-    Node* next_;
-    Node(int val, Node* next) : val_(val), next_(next){}
-    Node& operator=(const Node& other){
-        val_ = other.val_;
-        next_ = other.next_;
-        return *this;
-    }
-};
 
 // 模拟控制块类
 class Counter {
