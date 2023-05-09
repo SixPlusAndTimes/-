@@ -14,68 +14,95 @@ class Node {
 public:
     int key;
     int value;
-    Node* next;
-    Node* prev;
-    Node(int key, int value): key(key), value(value), next(nullptr), prev(nullptr) {
 
+    Node* next;
+    Node(int k, int v) :  key(k), value(v) ,next(nullptr) {
     }
-    Node() {}
 };
 
-class MyHashTable {
+class MyHashMap {
+private:
+    vector<Node*> ht_;
+    Node* findNodeInList(Node* head, int key) {
+        Node* res = nullptr;
+        while (head) {
+            if (head->key == key){
+                res = head;
+                break;
+            }
+            head = head->next;
+        }
+        return res;
+    }
+    void removeFromList(Node* list_head, int key) {
+        Node* pre = list_head;
+        Node* cur = list_head->next;
+        while (pre && cur) {
+            if (cur->key == key) {
+                pre->next = cur->next;
+                delete cur;
+                return;
+            }else {
+                pre = cur;
+                cur = cur->next;
+            }
+        }
+    }
 public:
-    MyHashTable():bucket_size(3) , ht_(bucket_size){
+    MyHashMap(): ht_(101, nullptr) { // 固定的vec长度
+    }
+
+    void put(int key, int value) {
+        int bk_num = key % ht_.size();
+        Node* list_head = ht_[bk_num];
+        if (!list_head) { // 这个bucket还是空的，那么直接放在这里
+            ht_[bk_num] = new Node(key,value);
+        }else {
+            Node* finded_node = findNodeInList(list_head, key);
+            if (finded_node) {
+                finded_node->value = value;
+            }else {
+                finded_node = new Node(key, value);
+                Node* temp = list_head->next;
+                list_head->next = finded_node;
+
+                finded_node->next = temp;
+            }
+        }
+
 
     }
-    Node* getNode(Node* head, int key) {
-        while (head) {
-            if (head->key == key) {
-                return head;
-            }else {
-                head = head->next;
-            }
-        }
-        return head;
-    }
-    void put(int key, int val) {
-        int bucket_num = hasher(key) % ht_.size();
-        if (ht_[bucket_num] == nullptr) { // 这个位置还没有链表存在
-            Node* newnode  = new Node(key,val);
-            ht_[bucket_num] = newnode;
-        }else {
-            Node* chain_head = ht_[bucket_num];
-            Node* origin_node = getNode(chain_head, key);
-            if (origin_node) { // 如果链表中有相同的key的node
-                origin_node->value = val;
-            }else { // 如果没有则新插入一个node在这个链中
-                Node* newnode = new Node(key, val);
-                newnode->next = chain_head;
-                chain_head->prev = newnode;
-                ht_[bucket_num] = newnode;
-            }
-        }
-    }
+    
     int get(int key) {
-        int bucket_num = hasher(key) % ht_.size();
-        if (ht_[bucket_num] == nullptr) {
+        int bk_num = key % ht_.size();
+        Node* list_head = ht_[bk_num];
+        if (list_head) {
+        }
+        Node* finded_node = findNodeInList(list_head, key);
+        if (finded_node) {
+            return finded_node->value;
+        }else {
             return -1;
         }
-
-        Node* node = getNode(ht_[bucket_num], key);
-        if (!node) return -1;
-        return node->value;
+    }
+    
+    void remove(int key) {
+        int  bk_num = key % ht_.size();
+        Node* list_head = ht_[bk_num];
+        if (!list_head) return ;
+        if (list_head && list_head->key == key) {
+            ht_[bk_num] = list_head->next;
+            delete list_head;
+        }else {
+            removeFromList(list_head, key);
+        }
+        
     }
 
-    bool contains(int key) {
-
-    }
-private:
-    int bucket_size ;
-    std::hash<int> hasher = std::hash<int>();
-    vector<Node*> ht_;
 };
+
 int main() {
-    MyHashTable myht;
+    MyHashMap myht;
     myht.put(1, 2);
     
     myht.put(2, 3);
