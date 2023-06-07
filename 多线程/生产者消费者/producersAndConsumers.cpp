@@ -6,7 +6,7 @@
 #include <condition_variable>
 #include <queue>
 #include <thread>
-const int maxBound = 10; // 缓冲区最多有10个
+const int maxBound = 10; // 缓冲区最多有9个, 还有一个是空位，为了区分判断空和满两种状况
 int read_ptr = 0;
 int write_ptr = 0;
 std::vector<char> shared_buf(10); // 环形缓冲区

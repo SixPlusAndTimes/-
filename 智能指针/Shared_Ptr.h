@@ -26,6 +26,8 @@ class Shared_Ptr{
                 if (--count_->ref_count_== 0) {
                     delete resource_;
                     delete count_;
+                    resource_ = nullptr;
+                    count_ = nullptr;
                 }
             }
         }
