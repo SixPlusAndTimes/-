@@ -32,4 +32,6 @@ int main() {
     cout << qe.top() << endl;
     cout << mque.top() << endl;
     assert(qe.top() == mque.top());
+
+    
 }
