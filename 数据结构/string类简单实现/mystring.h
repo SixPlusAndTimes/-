@@ -44,6 +44,7 @@ public:
         this->size_ = mstr.size();
         this->capacity_ = mstr.getCapacity();
         strcpy(this->str_, mstr.c_str());
+        
         return *this;
     }
 

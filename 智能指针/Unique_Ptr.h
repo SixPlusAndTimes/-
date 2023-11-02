@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <iostream>
 #include <memory>
 class Node {
@@ -29,7 +30,9 @@ public:
     }
     Unique_Ptr& operator=(Unique_Ptr&& other) {
         if (&other != this) {
-            delete resource_;
+            if (resource_) {
+                delete resource_;
+            }
             resource_ = other.resource_;
             other.resource_ = nullptr;
         }
@@ -43,11 +46,27 @@ public:
         }
     }
     T& operator*() const{
-        return *resource_;
+        if (resource_) {
+            return resource_;
+        }else {
+            return nullptr;
+        }
     }
 
     T* operator->() const{
-        return resource_;
+        if (resource_) {
+            return resource_;
+        }else {
+            return nullptr;
+        }
+    }
+    // 用于 if (Unique_Ptr) {..} 的场景
+    operator bool() {
+        if (resource_) {
+            return true;
+        }else {
+            return false;
+        }
     }
 };
 
