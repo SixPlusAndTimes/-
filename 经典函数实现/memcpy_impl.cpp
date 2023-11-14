@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <string.h>
 #include <iostream>
-void* my_memcpy(char* dest, char* src, size_t n) {
+void* my_memcpy(char* dest, const char* src, size_t n) {
     char* ret = dest;
 
     while (n--) {

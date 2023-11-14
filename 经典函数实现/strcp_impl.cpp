@@ -3,8 +3,9 @@
 #include <iostream>
 char* my_strcpy(char* dest, char* src) {
     char* ret = dest;
-    while ((*dest++ = *src++)) {
-
+    while (*dest == *src && *dest != '\0') {
+        dest++;
+        src++;
     }
     return ret;
 }
